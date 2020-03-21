@@ -1,9 +1,15 @@
 experiment:
     name: 'exp3'
 data:
-    history: 30
+    history: 600
     cols: ['frame.len', 'ip.proto', 'ip.len', 'tcp.len', 'Value']
     target: 'normality'
 feature_eng:
     features: ['ap_entropy', 'bin_power', 'dfa', 'fisher_info', 'hurst', 'pfd', 'samp_entropy', 'spectral_entropy', 'svd_entropy']
-    cols: ['frame.len', 'ip.proto', 'ip.len', 'tcp.len', 'Value', 'normality']
+    M : 5
+    r : 0.3
+    band : [0.5, 1, 1.5, 2]
+    FS : 5
+    tau: 4
+    DE : 10
+

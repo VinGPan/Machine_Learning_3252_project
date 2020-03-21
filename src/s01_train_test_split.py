@@ -15,3 +15,8 @@ test = df[train_end:]
 
 train.to_csv("../data/train.csv", index=False)
 test.to_csv("../data/test.csv", index=False)
+
+# data is known to be one entire day
+tot_seconds_in_a_day = 24 * 60 * 60
+samples_per_sec = int(df.shape[0] / tot_seconds_in_a_day)
+print("Sampling Frequency = " + str(samples_per_sec))

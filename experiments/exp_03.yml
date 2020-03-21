@@ -1,3 +1,5 @@
+experiment:
+    name: 'exp3'
 data:
     history: 30
     cols: ['frame.len', 'ip.proto', 'ip.len', 'tcp.len', 'Value']

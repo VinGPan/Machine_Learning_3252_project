@@ -1,0 +1,4 @@
+data:
+    history: 5
+    cols: ['frame.len', 'ip.proto', 'ip.len', 'tcp.len', 'Value']
+    target: 'normality'

@@ -1,0 +1,7 @@
+data:
+    history: 30
+    cols: ['frame.len', 'ip.proto', 'ip.len', 'tcp.len', 'Value']
+    target: 'normality'
+feature_eng:
+    features: ['ap_entropy', 'bin_power', 'dfa', 'fisher_info', 'hurst', 'pfd', 'samp_entropy', 'spectral_entropy', 'svd_entropy']
+    cols: ['frame.len', 'ip.proto', 'ip.len', 'tcp.len', 'Value', 'normality']

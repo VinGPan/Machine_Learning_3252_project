@@ -19,7 +19,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-import xgboost
+import xgboost as xgb
 
 from sklearn.ensemble import BaggingClassifier
 from sklearn.ensemble import AdaBoostClassifier
@@ -59,8 +59,9 @@ def build_models(yml_name):
         pass
 
     model_scores = {}
+    tot_classes = np.unique(y).shape[0]
 
-    for clf_str in configs["models"]["classifiers"][0:4]:
+    for clf_str in configs["models"]["classifiers"]:
         for preproc_str in configs["models"]["preprocs"]:
             for transforms_str in configs["models"]["transforms"]:
                 steps = [('imputer', SimpleImputer(strategy='mean'))]
@@ -117,13 +118,26 @@ def build_models(yml_name):
                     steps.append(('clf', SVC(class_weight='balanced', random_state=42)))
                     mp_tmp = dict(param_grid[0])
                     param_grid[0]["clf__kernel"] = ['linear']
-                    param_grid[0]["clf__C"] = [0.01, 0.1, 1, 10]
+                    param_grid[0]["clf__C"] = [0.01, 0.1, 1]
 
                     param_grid.append(dict(mp_tmp))
                     param_grid[1]["clf__kernel"] = ['rbf']
-                    param_grid[1]["clf__gamma"] = ['scale', 'auto', 0.01, 0.1, 1, 10]
-                    param_grid[1]["clf__C"] = [0.01, 0.1, 1, 10]
-
+                    param_grid[1]["clf__gamma"] = [0.01, 0.1, 1]
+                    param_grid[1]["clf__C"] = [0.01, 0.1, 1]
+                elif clf_str == 'xgboost':
+                    steps.append(('clf',
+                                  xgb.XGBClassifier(random_state=42, objective="multi:softmax", num_class=tot_classes)))
+                    param_grid[0]["clf__learning_rate"] = [0.001, 0.01, 0.1]
+                    param_grid[0]["clf__n_estimators"] = [50, 100, 150, 200]
+                elif clf_str == 'adaboost':
+                    steps.append(('clf',
+                                  AdaBoostClassifier(random_state=42)))
+                    param_grid[0]["clf__n_estimators"] = [50, 100, 150, 200]
+                elif clf_str == 'gradboost':
+                    steps.append(('clf',
+                                  GradientBoostingClassifier(random_state=42)))
+                    param_grid[0]["clf__learning_rate"] = [0.001, 0.01, 0.1]
+                    param_grid[0]["clf__n_estimators"] = [50, 100, 150, 200]
                 ############################################
 
                 pipeline = Pipeline(steps=steps)

@@ -22,11 +22,12 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
+import xgboost
 
 from sklearn.ensemble import BaggingClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import GradientBoostingClassifier
-import xgboost
+
 
 from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
 from sklearn.model_selection import PredefinedSplit
@@ -62,24 +63,61 @@ def build_models(yml_name):
 
     model_scores = {}
 
-    for clf_str in configs["models"]["classifiers"]:
+    for clf_str in configs["models"]["classifiers"][0:5]:
         for preproc_str in configs["models"]["preprocs"]:
             for transforms_str in configs["models"]["transforms"]:
                 steps = [('imputer', SimpleImputer(strategy='mean'))]
                 param_grid = [{}]
+                ############################################
                 if preproc_str == 'min_max':
                     steps.append(('preprocs', MinMaxScaler()))
                 elif preproc_str == 'standard_scalar':
                     steps.append(('preprocs', StandardScaler()))
+                ############################################
+
+                ############################################
                 if transforms_str == 'pca':
                     steps.append(('transforms', PCA()))
                     param_grid[0]["transforms__n_components"] = [0.1, 0.25, 0.5, 0.75, 0.9]
+                ############################################
 
+                ############################################
                 if clf_str == 'logistic':
                     steps.append(('clf', LogisticRegression(multi_class='auto', random_state=0, solver='liblinear')))
                     param_grid[0]["clf__penalty"] = ['l1', 'l2']
                     param_grid[0]["clf__C"] = [0.01, 0.1, 0.2, 0.5, 0.75, 1, 2, 10]
                     param_grid[0]["clf__class_weight"] = [None, 'balanced']
+                elif clf_str == 'naive_bayes':
+                    steps.append(('clf', GaussianNB()))
+                elif clf_str == 'knn':
+                    steps.append(('clf', KNeighborsClassifier()))
+                    param_grid[0]["clf__n_neighbors"] = [3, 5, 10, 20]
+                    param_grid[0]["clf__weights"] = ['uniform', 'distance']
+                    param_grid[0]["clf__metric"] = ['euclidean', 'manhattan']
+                elif clf_str == 'random_forest':
+                    steps.append(('clf', RandomForestClassifier()))
+                    param_grid[0]["clf__max_depth"] = [3, 7, 10, 15, 20]
+                    param_grid[0]["clf__min_samples_leaf"] = [1, 10, 15, 30]
+                    param_grid[0]["clf__min_samples_split"] = [10, 15, 30]
+                    param_grid[0]["clf__n_estimators"] = [50, 100, 150, 200]
+                elif clf_str == 'svc':
+                    steps.append(('clf', SVC(class_weight='balanced', random_state=42)))
+                    mp_tmp = dict(param_grid[0])
+                    param_grid[0]["clf__kernel"] = ['linear']
+                    param_grid[0]["clf__C"] = [0.01, 0.1, 0.2, 0.5, 0.75, 1, 2, 10]
+
+                    param_grid.append(dict(mp_tmp))
+                    param_grid[1]["clf__kernel"] = ['poly']
+                    param_grid[1]["clf__degree"] = [2, 3, 4, 5]
+                    param_grid[1]["clf__C"] = [0.01, 0.1, 0.2, 0.5, 0.75, 1, 2, 10]
+                    param_grid[1]["clf__gamma"] = ['scale', 'auto', 0.01, 0.1, 0.2, 0.5, 0.75, 1, 2, 10]
+
+                    param_grid.append(dict(mp_tmp))
+                    param_grid[2]["clf__kernel"] = ['rbf']
+                    param_grid[2]["clf__gamma"] = ['scale', 'auto', 0.01, 0.1, 0.2, 0.5, 0.75, 1, 2, 10]
+                    param_grid[2]["clf__C"] = [0.01, 0.1, 0.2, 0.5, 0.75, 1, 2, 10]
+
+                ############################################
 
                 pipeline = Pipeline(steps=steps)
                 clf = GridSearchCV(estimator=pipeline, cv=pds, param_grid=param_grid, verbose=1, scoring='balanced_accuracy')
@@ -100,7 +138,8 @@ def build_models(yml_name):
                 f1 = f1_score(y_val, val_preds, average='weighted')
                 model_scores[clf_str].append([res_path, clf.best_params_, clf.best_score_,
                                               accuracy, bal_accuracy, f1])
-            print(model_scores)
-            return
+
+    print(model_scores)
+
 
 

@@ -13,9 +13,6 @@ from sklearn.manifold import LocallyLinearEmbedding
 from sklearn.manifold import MDS
 from sklearn.manifold import Isomap
 from sklearn.manifold import TSNE
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-
-from sklearn.preprocessing import PolynomialFeatures
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
@@ -63,7 +60,7 @@ def build_models(yml_name):
 
     model_scores = {}
 
-    for clf_str in configs["models"]["classifiers"][0:5]:
+    for clf_str in configs["models"]["classifiers"][0:4]:
         for preproc_str in configs["models"]["preprocs"]:
             for transforms_str in configs["models"]["transforms"]:
                 steps = [('imputer', SimpleImputer(strategy='mean'))]
@@ -78,14 +75,31 @@ def build_models(yml_name):
                 ############################################
                 if transforms_str == 'pca':
                     steps.append(('transforms', PCA()))
-                    param_grid[0]["transforms__n_components"] = [0.1, 0.25, 0.5, 0.75, 0.9]
+                    param_grid[0]["transforms__n_components"] = [3, 5, 10]
+                elif transforms_str == 'kpca':
+                    steps.append(('transforms', KernelPCA(kernel='rbf')))
+                    param_grid[0]["transforms__n_components"] = [3, 4, 5]
+                elif transforms_str == 'lle':
+                    steps.append(('transforms', LocallyLinearEmbedding()))
+                    param_grid[0]["transforms__n_components"] = [3, 4, 5]
+                    param_grid[0]["transforms__n_neighbors"] = [3, 5, 7]
+                # elif transforms_str == 'mds':
+                #     steps.append(('transforms', MDS())) # DOES NOT HAVe transform() function
+                #     param_grid[0]["transforms__n_components"] = [3, 4, 5]
+                elif transforms_str == 'isomap':
+                    steps.append(('transforms', Isomap()))
+                    param_grid[0]["transforms__n_components"] = [3, 4, 5]
+                    param_grid[0]["transforms__n_neighbors"] = [3, 5, 7]
+                # elif transforms_str == 'tsne':  # DOES NOT HAVe transform() function
+                #     steps.append(('transforms', TSNE()))
+                #     param_grid[0]["transforms__n_components"] = [3, 4, 5]
                 ############################################
 
                 ############################################
                 if clf_str == 'logistic':
                     steps.append(('clf', LogisticRegression(multi_class='auto', random_state=0, solver='liblinear')))
                     param_grid[0]["clf__penalty"] = ['l1', 'l2']
-                    param_grid[0]["clf__C"] = [0.01, 0.1, 0.2, 0.5, 0.75, 1, 2, 10]
+                    param_grid[0]["clf__C"] = [0.01, 0.1, 1, 10]
                     param_grid[0]["clf__class_weight"] = [None, 'balanced']
                 elif clf_str == 'naive_bayes':
                     steps.append(('clf', GaussianNB()))
@@ -96,26 +110,19 @@ def build_models(yml_name):
                     param_grid[0]["clf__metric"] = ['euclidean', 'manhattan']
                 elif clf_str == 'random_forest':
                     steps.append(('clf', RandomForestClassifier()))
-                    param_grid[0]["clf__max_depth"] = [3, 7, 10, 15, 20]
-                    param_grid[0]["clf__min_samples_leaf"] = [1, 10, 15, 30]
+                    param_grid[0]["clf__max_depth"] = [3, 7, 10, 20]
                     param_grid[0]["clf__min_samples_split"] = [10, 15, 30]
                     param_grid[0]["clf__n_estimators"] = [50, 100, 150, 200]
                 elif clf_str == 'svc':
                     steps.append(('clf', SVC(class_weight='balanced', random_state=42)))
                     mp_tmp = dict(param_grid[0])
                     param_grid[0]["clf__kernel"] = ['linear']
-                    param_grid[0]["clf__C"] = [0.01, 0.1, 0.2, 0.5, 0.75, 1, 2, 10]
+                    param_grid[0]["clf__C"] = [0.01, 0.1, 1, 10]
 
                     param_grid.append(dict(mp_tmp))
-                    param_grid[1]["clf__kernel"] = ['poly']
-                    param_grid[1]["clf__degree"] = [2, 3, 4, 5]
-                    param_grid[1]["clf__C"] = [0.01, 0.1, 0.2, 0.5, 0.75, 1, 2, 10]
-                    param_grid[1]["clf__gamma"] = ['scale', 'auto', 0.01, 0.1, 0.2, 0.5, 0.75, 1, 2, 10]
-
-                    param_grid.append(dict(mp_tmp))
-                    param_grid[2]["clf__kernel"] = ['rbf']
-                    param_grid[2]["clf__gamma"] = ['scale', 'auto', 0.01, 0.1, 0.2, 0.5, 0.75, 1, 2, 10]
-                    param_grid[2]["clf__C"] = [0.01, 0.1, 0.2, 0.5, 0.75, 1, 2, 10]
+                    param_grid[1]["clf__kernel"] = ['rbf']
+                    param_grid[1]["clf__gamma"] = ['scale', 'auto', 0.01, 0.1, 1, 10]
+                    param_grid[1]["clf__C"] = [0.01, 0.1, 1, 10]
 
                 ############################################
 
@@ -136,9 +143,9 @@ def build_models(yml_name):
                 accuracy = accuracy_score(y_val, val_preds)
                 bal_accuracy = balanced_accuracy_score(y_val, val_preds)
                 f1 = f1_score(y_val, val_preds, average='weighted')
-                model_scores[clf_str].append([res_path, clf.best_params_, clf.best_score_,
+                model_scores[clf_str].append([res_path, clf.best_score_, clf.best_params_,
                                               accuracy, bal_accuracy, f1])
-
+                print([model_scores[clf_str][-1][0:2]])
     print(model_scores)
 
 

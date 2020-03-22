@@ -4,3 +4,7 @@ data:
     history: 5
     cols: ['frame.len', 'ip.proto', 'ip.len', 'tcp.len', 'Value']
     target: 'normality'
+models:
+    classifiers: ['logistic', 'naive_bayes', 'knn', 'random_forest', 'svc', 'xgboost']
+    preprocs: ['none', 'min_max', 'standard_scalar']
+    transforms : ['none', 'pca', 'kpca']

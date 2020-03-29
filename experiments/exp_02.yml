@@ -2,9 +2,10 @@ experiment:
     name: 'exp2'
 data:
     history: 5
+    lead: 10
     cols: ['frame.len', 'ip.proto', 'ip.len', 'tcp.len', 'Value']
     target: 'normality'
 models:
-    classifiers: ['logistic', 'naive_bayes', 'knn', 'random_forest', 'xgboost', 'adaboost', 'gradboost', 'svc']
+    classifiers: ['logistic', 'naive_bayes', 'knn', 'random_forest', 'xgboost', 'adaboost', 'gradboost']
     preprocs: ['none', 'min_max', 'standard_scalar']
-    transforms : ['none', 'pca', 'kpca', 'lle', 'isomap']
+    transforms : ['none', 'pca'] # 'kpca', 'lle' , 'isomap'

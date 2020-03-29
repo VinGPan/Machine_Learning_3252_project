@@ -149,7 +149,11 @@ def build_models(yml_name):
                 if os.path.exists(res_path):
                     clf = joblib.load(res_path)
                 else:
-                    clf.fit(X, y)
+                    try:
+                        clf.fit(X, y)
+                    except:
+                        print("Failed for " + res_path)
+                        continue
                     joblib.dump(clf, res_path)
                 if clf_str not in model_scores:
                     model_scores[clf_str] = []
@@ -161,6 +165,3 @@ def build_models(yml_name):
                                               accuracy, bal_accuracy, f1])
                 print([model_scores[clf_str][-1][0:2]])
     print(model_scores)
-
-
-

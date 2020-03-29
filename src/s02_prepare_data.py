@@ -9,6 +9,7 @@ def make_data(inp_path, config):
     history = config["data"]["history"]
     X = (df[config["data"]["cols"]]).values
     y = (df[config["data"]["target"]]).values
+    lead = config["data"]["lead"]
     if history == 0:
         pass
     else:
@@ -21,6 +22,8 @@ def make_data(inp_path, config):
         X = X.reshape((new_r, c * history))
         y = y.reshape((new_r, 1 * history))
         y = y[:, -1]
+        X = X[0:-lead, :]
+        y = y[lead:]
     if "feature_eng" in config:
         feature_names = config["feature_eng"]["features"]
         X = compute_features(X, feature_names, history, config)

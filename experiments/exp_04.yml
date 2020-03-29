@@ -1,8 +1,8 @@
 experiment:
-    name: 'exp3'
+    name: 'exp4'
 data:
     history: 600
-    lead: 10
+    lead: 1
     cols: ['frame.len', 'ip.proto', 'ip.len', 'tcp.len', 'Value']
     target: 'normality'
 feature_eng:
@@ -14,7 +14,7 @@ feature_eng:
     tau: 4
     DE : 10
 models:
-    classifiers: ['logistic', 'naive_bayes', 'knn', 'random_forest', 'xgboost', 'adaboost', 'gradboost', 'svc']
+    classifiers: ['logistic', 'naive_bayes', 'knn', 'random_forest', 'xgboost', 'adaboost', 'gradboost']
     preprocs: ['none', 'min_max', 'standard_scalar']
     transforms : ['none', 'pca', 'kpca', 'lle', 'isomap']
 

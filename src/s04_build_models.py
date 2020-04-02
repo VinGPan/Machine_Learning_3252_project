@@ -46,12 +46,19 @@ def build_models(yml_name):
     X = np.load("data/" + configs["experiment"]["name"] + "_X.npy")
     y = np.load("data/" + configs["experiment"]["name"] + "_y.npy")
 
-    train_proportion = 0.8
+    train_proportion = 0.9
     train_end = int(X.shape[0] * train_proportion)
-    split_index = [-1 if i < train_end else 0 for i in range(X.shape[0])]
-    pds = PredefinedSplit(test_fold=split_index)
+
+    X_train = X[0:train_end, :]
+    y_train = y[0:train_end]
+
+    cv_end = int(X_train.shape[0] * train_proportion)
+
     X_val = X[train_end:, :]
     y_val = y[train_end:]
+
+    split_index = [-1 if i < cv_end else 0 for i in range(X_train.shape[0])]
+    pds = PredefinedSplit(test_fold=split_index)
 
     try:
         os.mkdir("output/" + configs["experiment"]["name"] + "/")
@@ -59,6 +66,7 @@ def build_models(yml_name):
         pass
 
     model_scores = {}
+    all_scores = []
     tot_classes = np.unique(y).shape[0]
 
     for clf_str in configs["models"]["classifiers"]:
@@ -150,7 +158,7 @@ def build_models(yml_name):
                     clf = joblib.load(res_path)
                 else:
                     try:
-                        clf.fit(X, y)
+                        clf.fit(X_train, y_train)
                     except:
                         print("Failed for " + res_path)
                         continue
@@ -158,10 +166,13 @@ def build_models(yml_name):
                 if clf_str not in model_scores:
                     model_scores[clf_str] = []
                 val_preds = clf.predict(X_val)
-                accuracy = accuracy_score(y_val, val_preds)
-                bal_accuracy = balanced_accuracy_score(y_val, val_preds)
-                f1 = f1_score(y_val, val_preds, average='weighted')
-                model_scores[clf_str].append([res_path, clf.best_score_, clf.best_params_,
-                                              accuracy, bal_accuracy, f1])
-                print([model_scores[clf_str][-1][0:2]])
-    print(model_scores)
+                accuracy = round(accuracy_score(y_val, val_preds), 2)
+                bal_accuracy = round(balanced_accuracy_score(y_val, val_preds), 2)
+                f1 = round(f1_score(y_val, val_preds, average='weighted'), 2)
+                model_scores[clf_str].append([res_path, accuracy, bal_accuracy, f1, clf.best_params_])
+                print([model_scores[clf_str][-1][0:4]])
+                all_scores.append([res_path, accuracy, bal_accuracy, f1, clf.best_params_])
+
+    all_scores = sorted(all_scores, key=lambda x:x[3], reverse=True)
+    for score in all_scores[0:5]:
+        print(score)

@@ -2,7 +2,7 @@ experiment:
     name: 'exp4'
 data:
     history: 600
-    lead: 1
+    lead: 10
     cols: ['frame.len', 'ip.proto', 'ip.len', 'tcp.len', 'Value']
     target: 'normality'
 feature_eng:

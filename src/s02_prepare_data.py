@@ -2,6 +2,7 @@ from src.s03_compute_features import compute_features
 from src.utils import read_yml
 import pandas as pd
 import numpy as np
+import os
 
 
 def make_data(inp_path, config):
@@ -33,6 +34,8 @@ def make_data(inp_path, config):
 def prepare_data(yml_name, training):
     configs = read_yml(yml_name)
     if training:
+        if os.path.exists("data/" + configs["experiment"]["name"] + "_X.npy"):
+            return
         X, y = make_data('data/train.csv', configs)
         np.save("data/" + configs["experiment"]["name"] + "_X.npy", X)
         np.save("data/" + configs["experiment"]["name"] + "_y.npy", y)

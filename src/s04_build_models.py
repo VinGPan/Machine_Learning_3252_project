@@ -67,7 +67,7 @@ def build_models(yml_name):
     except:
         pass
 
-    if os.path.exists("output/" + configs["experiment"]["name"] + "/all_scores.pkl"):
+    if os.path.exists("output/" + configs["experiment"]["name"] + "/ball_scores.pkl"):
         all_scores = pickle.load(open("output/" + configs["experiment"]["name"] + "/all_scores.pkl", "rb"))
     else:
         model_scores = {}
@@ -166,23 +166,24 @@ def build_models(yml_name):
                     if os.path.exists(res_path):
                         clf = joblib.load(res_path)
                     else:
-                        # try:
-                        #     clf.fit(X_train, y_train)
-                        # except:
-                        #     continue
-                        # joblib.dump(clf, res_path)
-                        continue
+                        try:
+                            clf.fit(X_train, y_train)
+                        except:
+                            print("Crash For " + res_path)
+                            continue
+                        joblib.dump(clf, res_path)
+                        # continue
                     if clf_str not in model_scores:
                         model_scores[clf_str] = []
                     val_preds = clf.predict(X_val)
                     accuracy = accuracy_score(y_val, val_preds) * 100
-                    bal_accuracy = balanced_accuracy_score(y_val, val_preds)
+                    bal_accuracy = balanced_accuracy_score(y_val, val_preds) * 100
                     f1 = f1_score(y_val, val_preds, average='weighted', labels=np.unique(val_preds))
                     model_scores[clf_str].append([res_path, accuracy, bal_accuracy, f1, clf.best_params_])
                     res_str = 'classifier = ' + clf_str + ", preproc = " + preproc_str + ", transform = " + transforms_str
                     res_str += (' => accuracy = ' + str(accuracy) + '%, F1 = ' + str(f1))
                     # print(res_str)
-                    all_scores.append([clf_str, preproc_str, transforms_str, accuracy, bal_accuracy, f1, clf.best_params_])
+                    all_scores.append([clf_str, preproc_str, transforms_str, accuracy, bal_accuracy, f1])
 
         pickle.dump(all_scores, open("output/" + configs["experiment"]["name"] + "/all_scores.pkl", "wb"))
 
@@ -199,9 +200,11 @@ def build_models(yml_name):
         # print(res_str)
         prev_cls = score[0]
         cls_count += 1
-        top_scores.append(score[0:-1])
+        top_scores.append(score)
         if cls_count == 3:
             break
     df = pd.DataFrame(np.array(top_scores), columns=['classifier', 'preprocess', 'transform', 'accuracy', 'balanced_accuracy',
+                                                'f1_score'])
+    all_scores = pd.DataFrame(np.array(all_scores), columns=['classifier', 'preprocess', 'transform', 'accuracy', 'balanced_accuracy',
                                                 'f1_score'])
     return all_scores, df

@@ -67,7 +67,7 @@ def build_models(yml_name):
     except:
         pass
 
-    if os.path.exists("output/" + configs["experiment"]["name"] + "/ball_scores.pkl"):
+    if os.path.exists("output/" + configs["experiment"]["name"] + "/all_scores.pkl"):
         all_scores = pickle.load(open("output/" + configs["experiment"]["name"] + "/all_scores.pkl", "rb"))
     else:
         model_scores = {}

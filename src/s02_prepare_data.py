@@ -35,10 +35,13 @@ def prepare_data(yml_name, training):
     configs = read_yml(yml_name)
     if training:
         if os.path.exists("data/" + configs["experiment"]["name"] + "_X.npy"):
-            return
-        X, y = make_data('data/train.csv', configs)
-        np.save("data/" + configs["experiment"]["name"] + "_X.npy", X)
-        np.save("data/" + configs["experiment"]["name"] + "_y.npy", y)
+            X = np.load("data/" + configs["experiment"]["name"] + "_X.npy")
+            y = np.load("data/" + configs["experiment"]["name"] + "_y.npy")
+            print("Train Set Dimensionality " + str(X.shape))
+        else:
+            X, y = make_data('data/train.csv', configs)
+            np.save("data/" + configs["experiment"]["name"] + "_X.npy", X)
+            np.save("data/" + configs["experiment"]["name"] + "_y.npy", y)
     else:
         X, y = make_data('data/test.csv', configs)
         np.save("data/test_X.npy", X)

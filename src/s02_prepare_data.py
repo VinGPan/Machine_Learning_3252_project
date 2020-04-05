@@ -5,8 +5,7 @@ import numpy as np
 import os
 
 
-def make_data(inp_path, config):
-    df = pd.read_csv(inp_path)
+def make_data(df, config):
     history = config["data"]["history"]
     X = (df[config["data"]["cols"]]).values
     y = (df[config["data"]["target"]]).values
@@ -39,11 +38,13 @@ def prepare_data(yml_name, training):
             y = np.load("data/" + configs["experiment"]["name"] + "_y.npy")
             print("Train Set Dimensionality " + str(X.shape))
         else:
-            X, y = make_data('data/train.csv', configs)
+            df = pd.read_csv('data/train.csv')
+            X, y = make_data(df, configs)
             np.save("data/" + configs["experiment"]["name"] + "_X.npy", X)
             np.save("data/" + configs["experiment"]["name"] + "_y.npy", y)
     else:
-        X, y = make_data('data/test.csv', configs)
+        df = pd.read_csv('data/test.csv')
+        X, y = make_data(df, configs)
         np.save("data/test_X.npy", X)
         np.save("data/test_y.npy", y)
     return X, y

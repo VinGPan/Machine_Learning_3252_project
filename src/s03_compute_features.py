@@ -3,6 +3,16 @@ import third_party.pyeeg.pyeeg as pyeeg
 
 
 def compute_features(X, feature_names, history, config):
+    '''
+    This is just wrapper function to PyEEG APIs.
+    This function computes PyEEG features for entire dataset.
+
+    :param X: input time-series data. Each row will have one time-series per original features
+    :param feature_names: PyEEG features to compute
+    :param history: Is used to compute number of features. TODO: pass number of features instead
+    :param config: part of the
+    :return: computed PyEEG features
+    '''
     features = []
     col_count = int(X.shape[1] / history)
     M = config["feature_eng"]["M"]

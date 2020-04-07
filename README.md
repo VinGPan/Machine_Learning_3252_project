@@ -25,13 +25,14 @@ $ python setup.py install
 Run project.ipynb
 
 
-### experiment
+### Experiments
 An experiment is one invocation of model building process. Description of the 
 experiment is provided via a yml file. In this project we have 5 experiments.
 The yml containing experiment description and can be found under experiments folder.
-This yml file provides description 
+This yml file provides 
 1) details of how to preproces the data
-2) details of ML models to be build
+2) details of PyEEG features to be computed (optional)
+3) details of ML models to be build
  
 To run an experiment
 ```sh
